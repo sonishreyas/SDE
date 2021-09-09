@@ -193,4 +193,201 @@ Practice: https://leetcode.com/problems/game-of-life/
 
 ---------------------------------------------------------------
 
-2.
+2. 
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+# Day4: (Hashing)
+---------------------------------------------------------------
+---------------------------------------------------------------
+1. 2sums
+
+---------------------------------------------------------------
+2. 4 sums
+
+Ques: Given an array nums of n integers, return an array of all the unique quadruplets [nums[a], nums[b], nums[c], nums[d]] such that:
+
+    0 <= a, b, c, d < n
+    a, b, c, and d are distinct.
+    nums[a] + nums[b] + nums[c] + nums[d] == target
+
+You may return the answer in any order.
+
+Example 1:
+
+Input: nums = [1,0,-1,0,-2,2], target = 0
+Output: [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+
+Example 2:
+
+Input: nums = [2,2,2,2,2], target = 8
+Output: [[2,2,2,2]]
+
+Constraints:
+
+    1 <= nums.length <= 200
+    -109 <= nums[i] <= 109
+    -109 <= target <= 109
+
+Solution:
+
+* Brute force:
+ - Sort the array and then use 3 pointer and binary search.
+ - take 3 pointers i ,j and k and initialize as i=0,j=i+1 and k=j+1 now target2 = target - nums[i] - nums[j] - nums[k]
+ - now perform a binary search from k+1 to n for target2.
+ - repeat for all i,j,k. also check for duplicate.
+ - TC: N^3log(N) where N^3 is for 3 loops and log(N) for binary search.
+ - SC: O(1) as we don't calculate the space of the result array.
+
+* Optimized approach
+- Sort the array and use two pointers i,j.
+- initialize i=0 and j=i+1.
+- now target2 = target - nums[i] - nums[j]
+- now take two pointers front and back and initialize them as front = j+1 and back = n-1
+- now iterate while front < back. If yes then calculate sum = nums[front] + nums[back].
+- if sum == target2 then insert the quad [i,j,front,back] into result.
+- now to avoid duplicate increment front and back until they are not equal to the previous values.
+- same thing for j and i.
+- TC: N^3 for the 3 loops 
+- SC: O(1)
+
+Code:
+
+class Solution {
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        vector<vector<int>> res;
+        if (nums.empty())   {
+            return res;
+        }
+        int n = nums.size();
+        sort(nums.begin(),nums.end());
+        
+        for( int i = 0 ; i < n-1 ; i++ )  {
+            for ( int j = i+1 ; j < n ; j++)    {
+                int target_2 = target - nums[i] - nums[j];
+                int front = j+1;
+                int back = n-1;
+                while(front < back) {
+                    int sum = nums[front] + nums[back];
+                    if (sum < target_2) {
+                        front++;
+                    }
+                    else if(sum > target_2) {
+                        back--;
+                    }
+                    else    {
+                        vector <int> quad;
+                        quad.push_back(nums[i]);
+                        quad.push_back(nums[j]);
+                        quad.push_back(nums[front]);
+                        quad.push_back(nums[back]);
+                        res.push_back(quad);
+                        while(front < back && nums[front] == quad[2]) ++front;
+                        while(front < back && nums[back] == quad[3]) --back;
+                    }
+                }
+                while(j+1 < n && nums[j+1] == nums[j]) ++j;
+            }
+            while(i+1 < n-1 && nums[i+1] == nums[i]) ++i;
+        }
+        return res;
+    }
+};
+
+---------------------------------------------------------------
+3. Given an unsorted array of integers nums, return the length of the longest consecutive elements sequence.
+
+You must write an algorithm that runs in O(n) time.
+
+Example 1:
+
+Input: nums = [100,4,200,1,3,2]
+Output: 4
+Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefore its length is 4.
+
+Example 2:
+
+Input: nums = [0,3,7,2,5,8,4,6,0,1]
+Output: 9
+
+Constraints:
+
+    0 <= nums.length <= 105
+    -109 <= nums[i] <= 109
+
+Solution:
+
+* Brute force:
+ - Sort the array.
+ - Initialize a counter c = 1 and max_seq = -1 
+ - iterate over the array and and check for sequence and get the max sequence.
+ - TC: O(Nlog(N)) + O(N) where nlog(n) is for the sort. 
+
+Code:
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        if (nums.empty())   {
+            return 0;
+        }
+        int n = nums.size();
+        sort(nums.begin(),nums.end());
+        int max_seq = -1;
+        int c = 1;
+        for(int i = 0 ; i < n-1 ; i++) {
+            if(nums[i+1] - nums[i] == 1)    c++;
+            else if(nums[i+1] - nums[i] == 0)   {
+                continue;
+            }
+            else    {
+                if (max_seq <= c)    {
+                    max_seq = c;  
+                }
+                c = 1;
+            }   
+        }
+        if (max_seq <= c)    {
+            max_seq = c;
+        }
+        return max_seq;
+    }
+};
+
+* Optimized approach
+- Declare a hashset and insert all elements in the hashset.
+- now iterate over the array and check if num-1 is present in hashset. if present then do nothing
+- if element is not present then initialize count =1, current number = num and then check and increase count until curr+1 is present in the hashset. 
+- TC: O(n) + O(n) + O(n) = O(3n) 
+- SC: O(n)
+
+Code:
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        if (nums.empty())   {
+            return 0;
+        }
+        int max_seq = 0;
+        set<int> hashSet;
+        for (int num : nums)   {
+            hashSet.insert(num);
+        }
+        for(int num:nums){
+            if(!hashSet.count(num-1))   {
+                int count = 1;
+                int curr = num;
+                while(hashSet.count(curr+1)) {
+                    count++;
+                    curr++;
+                }
+                max_seq = max(max_seq,count);
+            }
+        }
+        return max_seq;
+    }
+};
+
+---------------------------------------------------------------
+4. 
