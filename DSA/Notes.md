@@ -126,7 +126,7 @@ public:
 * Optimized approach - tortoise approach
 - Declare a fast and a slow pointer.
 - We will traverse the fast pointer by 2 and slow by 1.
-- if number of nodes is odd then we need to end at fast->next == NULL and if even fast->next->next == NULL.
+- if number of nodes is odd then we need to end at fast->next == NULL (FOr odd number of nodes in the list) and if even fast == NULL (For even number of nodes in the llist).
 - This will reduce the TC to O(N/2) 
 - TC: O(N/2)
 - SC: O(1)
@@ -249,5 +249,86 @@ public:
             l2->next = mergeTwoLists(l1, l2->next);
             return l2;
         }
+    }
+};
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+# Day6: (LinkedList)
+---------------------------------------------------------------
+---------------------------------------------------------------
+4. Check if a LinkedList is palindrome or not. 
+
+* Brute force
+- We traverse the linked list and append data to an array.
+- and compare the array for palindrome.
+- TC: O(N)
+- SC: O(N)
+
+* Optimized approach
+- we find the middle element and then reverse the link list from middle to end.
+- now compare the first half and second half.
+- TC: O(n/2) [last palindrome loop]+ O(n/2) [middle element]+ O(n/2)[reverse] + O(n/2)[if we have to convert back]
+- SC: O(1) 
+Code:
+
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    
+    ListNode* reverseList(ListNode* head) {
+        ListNode *p,*q,*r;
+        p = head;
+        q = head;
+        r = NULL;
+        while(q!= NULL) {
+            q = p->next;
+            p->next = r;
+            r = p;
+            p = q;
+        }
+        head = r;
+        return head;
+    }
+    
+    ListNode* middleElement(ListNode* head) {
+        ListNode *slow = head;
+        ListNode *fast = head;
+        while(fast->next!= NULL && fast->next->next!=NULL)    {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        head = slow->next;
+        return head;
+    }
+    bool isPalindrome(ListNode* head) {
+        if(head == NULL || head->next==NULL) return true;
+        
+        bool ans = false;
+        ListNode* temp = head;
+        ListNode* mid = middleElement(head);
+        ListNode* rev = reverseList(mid);
+        while(rev!=NULL)    {
+            if(rev->val == temp->val)   {
+                ans = true;
+                rev = rev->next;
+                temp = temp->next;
+            }
+            else    {
+                ans = false;
+                break;
+            }
+        }
+        
+        return ans;
     }
 };
